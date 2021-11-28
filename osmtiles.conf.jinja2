@@ -1,0 +1,25 @@
+server {
+    server_name osm.timporritt.com;
+
+    {% for source_conf in sources -%}
+    {{source_conf|indent}}
+    {{- "\n\n    " if not loop.last }}
+    {%- endfor %}
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/osm.timporritt.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/osm.timporritt.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+server {
+    # managed by Certbot
+    if ($host = osm.timporritt.com) {
+        return 301 https://$host$request_uri;
+    }
+
+    listen 80;
+    server_name osm.timporritt.com;
+    return 404; # managed by Certbot
+}

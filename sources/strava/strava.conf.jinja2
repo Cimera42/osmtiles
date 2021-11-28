@@ -1,0 +1,6 @@
+location /strava {
+    rewrite
+    ^/strava/(?<sw>[abc])/(?<z>\d+)/(?<x>\d+)/(?<y>\d+)$
+    https://heatmap-external-$sw.strava.com/tiles-auth/all/hot/$z/$x/$y.png?Key-Pair-Id={{ keyPair }}&Policy={{ policy }}&Signature={{ signature }}
+    permanent;
+}

@@ -1,0 +1,6 @@
+location /bom {
+    rewrite
+    ^/bom/(?<sw>[abc])/(?<z>\d+)/(?<x>\d+)/(?<y>\d+)$
+    https://radar-tiles.service.bom.gov.au/tiles/{{ timestamp }}/$z/$x/$y.png
+    permanent;
+}
