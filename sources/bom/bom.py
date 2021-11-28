@@ -1,9 +1,9 @@
-import requests
+import httpx
 from jinja2 import Template
 import os
 
 def run():
-    page = requests.get('https://api.weather.bom.gov.au/v1/rainradarlayer/capabilities')
+    page = httpx.get('https://api.weather.bom.gov.au/v1/rainradarlayer/capabilities')
     content = page.json()
 
     timestamp = max(content['data']['timesteps'])
