@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
-SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Provider
 apt-get install -y python3-venv
