@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 . ./venv/bin/activate
 python3 process.py
 
