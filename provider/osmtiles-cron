@@ -3,10 +3,8 @@
 #
 # bom - new tile sets available every 10 mins
 # strava - cookies last 7 days
-
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 HOME=/
-
-0 22 */5 * * root /home/osmtiles/provider/cron-runner.sh strava
-*/13 * * * * root /home/osmtiles/provider/cron-runner.sh bom
+0 22 */5 * * root /bin/bash /home/osmtiles/provider/cron-runner.sh strava
+*/3 * * * * root /bin/bash /home/osmtiles/provider/cron-runner.sh bom
