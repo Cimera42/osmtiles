@@ -12,7 +12,7 @@ python3 -m pip install -r requirements.txt
 
 python3 ./process.py
 
-cp -a $SCRIPT_DIR/conf-out /etc/nginx/sites-available
+cp -a $SCRIPT_DIR/conf-out/* /etc/nginx/sites-available
 systemctl reload nginx
 
 cp ./osmtiles-cron /etc/cron.d
