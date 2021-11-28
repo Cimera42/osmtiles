@@ -1,0 +1,10 @@
+#
+# crom.d/osmtiles-cron -- updates osm tile provider nginx config
+#
+
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+HOME=/
+
+0 22 * * fri /home/osmtiles/cron-runner.sh strava
+*/13 * * * * /home/osmtiles/cron-runner.sh bom
