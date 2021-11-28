@@ -6,3 +6,4 @@ set -e
 python3 process.py
 
 cp output/osmtiles.conf /etc/nginx/sites-available
+systemctl reload nginx
