@@ -1,10 +1,12 @@
 #
 # crom.d/osmtiles-cron -- updates osm tile provider nginx config
 #
+# bom - new tile sets available every 10 mins
+# strava - cookies last 7 days
 
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 HOME=/
 
-0 22 * * fri root /home/osmtiles/cron-runner.sh strava
+0 22 */5 * * root /home/osmtiles/cron-runner.sh strava
 */13 * * * * root /home/osmtiles/cron-runner.sh bom
