@@ -33,12 +33,21 @@ function createBlank() {
         .toBuffer();
 }
 
-async function getSource(name: string, sw: string, x: string, y: string, zoom: string): Promise<Buffer> {
+async function getSource(
+    name: string,
+    sw: string,
+    x: string,
+    y: string,
+    zoom: string
+): Promise<Buffer> {
     try {
         const request = await axios({
             method: 'get',
             url: `https://osm.timporritt.com/source/${name}/${sw}/${zoom}/${x}/${y}`,
             responseType: 'arraybuffer',
+            headers: {
+                'User-Agent': 'NodeJS',
+            },
         });
         return request.data;
     } catch (e) {
