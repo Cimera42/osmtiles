@@ -20,3 +20,7 @@ cp ./osmtiles-cron /etc/cron.d
 cd $SCRIPT_DIR
 
 # Merger
+
+cd $SCRIPT_DIR/merger
+yarn
+yarn build
