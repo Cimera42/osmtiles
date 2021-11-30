@@ -3,6 +3,8 @@ import os
 from lxml import html
 from jinja2 import Template
 
+from .creds import strava_username, strava_password
+
 def run():
     session = httpx.Client(http2=True)
 
@@ -19,8 +21,8 @@ def run():
         'utf8': '✓',
         csrf_param: csrf_token,
         'plan': '',
-        'email': 'cimera2@gmail.com',
-        'password': '6Lr4%R#V!RyVE@M2ge$3',
+        'email': strava_username,
+        'password': strava_password,
     }, follow_redirects=True)
 
     if login.url == 'https://www.strava.com/login':
