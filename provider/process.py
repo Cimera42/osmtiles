@@ -8,7 +8,7 @@ from jinja2 import Template
 
 sources = {
     'bom': run_bom,
-    # 'strava': run_strava(),
+    'strava': run_strava,
     'dcsnsw': run_dcsnsw,
 }
 
