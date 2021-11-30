@@ -2,7 +2,7 @@
 # Manual changes might be lost - proceed with caution!
 
 __metadata:
-  version: 4
+  version: 5
   cacheKey: 8
 
 "@babel/code-frame@npm:7.12.11":
@@ -605,8 +605,8 @@ __metadata:
 
 "arg@patch:arg@npm:5.0.1#.yarn/patches/arg-npm-5.0.1-297491f918::locator=osm-background-combiner%40workspace%3A.":
   version: 5.0.1
-  resolution: "arg@patch:arg@npm%3A5.0.1#.yarn/patches/arg-npm-5.0.1-297491f918::version=5.0.1&hash=e28c26&locator=osm-background-combiner%40workspace%3A."
-  checksum: 20e7bf53fc0ecaafd3b224117f7e299e2666646bcc3d52b76b872c3c50923cea44d7e869c43d1aaa0d0fdbc252a2bde04c82a203db84e4a6eb7b3ca052c71ae5
+  resolution: "arg@patch:arg@npm%3A5.0.1#.yarn/patches/arg-npm-5.0.1-297491f918::version=5.0.1&hash=794b67&locator=osm-background-combiner%40workspace%3A."
+  checksum: d19857b354411c198f72a938a1799b413540c3ce89b3c941cfba503d3324865c276253c7e9a4c2d15e9205907fba0f65906f55592a76ac1bd4013047544d861d
   languageName: node
   linkType: hard
 
@@ -1650,10 +1650,10 @@ __metadata:
 
 "fsevents@patch:fsevents@~2.3.2#~builtin<compat/fsevents>":
   version: 2.3.2
-  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=1cc4b2"
+  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=18f3a7"
   dependencies:
     node-gyp: latest
-  checksum: 78db9daf1f6526a49cefee3917cc988f62dc7f25b5dd80ad6de4ffc4af7f0cab7491ac737626ff53e482a111bc53aac9e411fe3602458eca36f6a003ecf69c16
+  conditions: os=darwin
   languageName: node
   linkType: hard
 
@@ -1663,6 +1663,7 @@ fsevents@~2.3.2:
   dependencies:
     node-gyp: latest
   checksum: 97ade64e75091afee5265e6956cb72ba34db7819b4c3e94c431d4be2b19b8bb7a2d4116da417950c3425f17c8fe693d25e20212cac583ac1521ad066b77ae31f
+  conditions: os=darwin
   languageName: node
   linkType: hard
 
@@ -3625,11 +3626,11 @@ typescript@^4.4.3:
 
 "typescript@patch:typescript@^4.4.3#~builtin<compat/typescript>":
   version: 4.4.3
-  resolution: "typescript@patch:typescript@npm%3A4.4.3#~builtin<compat/typescript>::version=4.4.3&hash=32657b"
+  resolution: "typescript@patch:typescript@npm%3A4.4.3#~builtin<compat/typescript>::version=4.4.3&hash=493e53"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 28ab98313afab46788ff41014fdb5932430ada6e03cf9e92ac47f406526a2cac1ae2894834e7da61e46b7429318e9c47f45ba8de323332f0cb9af99b72ebae74
+  checksum: 79f5c13d21c9dea3eb44d2b7002ff25a0569fefc432e083d65a360e3aca990aca25fc733e14aa6883b5e9a68e3e2f0330a34123e048806f91d701732ece00e6f
   languageName: node
   linkType: hard
 
