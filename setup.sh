@@ -22,5 +22,5 @@ cd $SCRIPT_DIR
 # Merger
 
 cd $SCRIPT_DIR/merger
-yarn install
+yarn install --frozen-lockfile
 yarn run build
