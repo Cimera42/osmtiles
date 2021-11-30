@@ -22,5 +22,5 @@ cd $SCRIPT_DIR
 # Merger
 
 cd $SCRIPT_DIR/merger
-yarn
-yarn build
+yarn install
+yarn run build
