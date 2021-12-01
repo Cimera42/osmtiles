@@ -75,11 +75,13 @@ export async function runServer(): Promise<void> {
 
             const aImage = sharp(A);
             const bImage = sharp(B);
-            const aImageMeta = await aImage.metadata();
-            const bImageMeta = await bImage.metadata();
+            // const aImageMeta = await aImage.metadata();
+            // const bImageMeta = await bImage.metadata();
 
-            const width = Math.max(aImageMeta.width ?? 0, bImageMeta.width ?? 0, 256);
-            const height = Math.max(aImageMeta.height ?? 0, bImageMeta.height ?? 0, 256);
+            // const width = Math.max(aImageMeta.width ?? 0, bImageMeta.width ?? 0, 256);
+            // const height = Math.max(aImageMeta.height ?? 0, bImageMeta.height ?? 0, 256);
+            const width = 256;
+            const height = 256;
 
             const combined = await aImage
                 .resize(width, height)
