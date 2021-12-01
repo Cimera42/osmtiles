@@ -51,11 +51,11 @@ async function getSource(
         });
         return request.data;
     } catch (e) {
-        // throw new NotFoundError(e);
         logger.error(
             `${name}: (${sw}, ${zoom}, ${x}, ${y}) - ${e?.response?.status}: ${e?.response?.statusText}`
         );
-        return createBlank();
+        throw new NotFoundError(e);
+        // return createBlank();
     }
 }
 
