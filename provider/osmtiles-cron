@@ -7,4 +7,4 @@ SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 HOME=/
 0 22 */5 * * root /bin/bash /home/osmtiles/provider/cron-runner.sh strava
-*/3 * * * * root /bin/bash /home/osmtiles/provider/cron-runner.sh bom
+*/1 * * * * root /bin/bash /home/osmtiles/provider/cron-runner.sh bom
