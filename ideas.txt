@@ -1,0 +1,5 @@
+Tile server that shows the current X, Y, Z
+
+Use parent tile if child gets 404
+
+Max zoom config for nginx
