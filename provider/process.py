@@ -19,7 +19,7 @@ parser.add_argument("--single", help="Update the conf for a single source.", typ
 args = parser.parse_args()
 
 
-dir_path = os.path.dirname(__file__)
+dir_path = os.path.dirname(os.path.realpath(__file__))
 output_folder = f'{dir_path}/../conf-out/osmtiles_include'
 os.makedirs(output_folder, exist_ok=True)
 
