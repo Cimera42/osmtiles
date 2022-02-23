@@ -4,6 +4,7 @@ from sources.bom.bom import run as run_bom
 from sources.strava.strava import run as run_strava
 from sources.dcsnsw.dcsnsw import run as run_dcsnsw
 from sources.osm.osm import run as run_osm
+from sources.bing.bing import run as run_bing
 from jinja2 import Template
 
 
@@ -12,6 +13,7 @@ sources = {
     'strava': run_strava,
     'dcsnsw': run_dcsnsw,
     'osm': run_osm,
+    'bing': run_bing,
 }
 
 parser = argparse.ArgumentParser("osmtiles-provider")
