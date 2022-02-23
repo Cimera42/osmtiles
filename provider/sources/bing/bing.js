@@ -5,10 +5,10 @@ function xyzToQuadkey(x, y, z) {
     let digit = 0;
     const mask = 1 << (i - 1);
 
-    if (x & (mask != 0)) {
+    if ((x & mask) != 0) {
       digit = digit + 1;
     }
-    if (y & (mask != 0)) {
+    if ((y & mask) != 0) {
       digit = digit + 2;
     }
 
@@ -24,12 +24,11 @@ const subdomainMap = {
   c: "2",
 };
 
-function getUrl(req) {
+function getBingUrl(req) {
   const uri = req.uri;
-  const match =
-    /^\/source\/bing\/(?<sw>[abc])\/(?<z>\d+)\/(?<x>\d+)\/(?<y>\d+)$/.match(
-      uri
-    );
+  const match = new RegExp(
+    "^/source/bing/(?<sw>[abc])/(?<z>\\d+)/(?<x>\\d+)/(?<y>\\d+)$"
+  ).exec(uri);
   if (match) {
     const subdomain = subdomainMap[match.groups["sw"]];
     const x = match.groups["x"];
@@ -42,3 +41,9 @@ function getUrl(req) {
     )}.jpeg?g=587&n=z`;
   }
 }
+
+function setBingLocationHeader() {
+  req.headersOut["Location"] = getBingUrl(req);
+}
+
+export default { setBingLocationHeader };
