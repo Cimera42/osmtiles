@@ -1,2 +1,4 @@
 osmtiles_include/provider/*.conf
+osmtiles_include/provider/js/*.js
 osmtiles_include/osmtiles_provider.conf
+osmtiles_include/osmtiles_provider_js.conf
