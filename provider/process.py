@@ -33,19 +33,21 @@ for source_name, gen_source_conf in sources.items():
     filename = f'{source_name}.conf'
     source_files.append(filename)
 
-    if args.single is None or args.single == source_name:
-        source = gen_source_conf()
-        conf = source
-        if type(source) is list:
-            conf = source[0]
-            if len(source) > 1:
-                js = source[1]
-                js_filename = f'{source_name}.js'
-                source_js_files.append(js_filename)
+    source = gen_source_conf()
+    conf = source
+    if type(source) is list:
+        conf = source[0]
+        if len(source) > 1:
+            js = source[1]
+            js_filename = f'{source_name}.js'
+            source_js_files.append(js_filename)
+
+            if args.single is None or args.single == source_name:
                 js_filepath = f'{output_folder}/provider/js/{js_filename}'
                 with open(js_filepath, 'w') as file_:
                     file_.write(js)
 
+    if args.single is None or args.single == source_name:
         filepath = f'{output_folder}/provider/{filename}'
         with open(filepath, 'w') as file_:
             file_.write(conf)
