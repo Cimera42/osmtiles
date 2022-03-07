@@ -65,7 +65,7 @@ export async function runServer(): Promise<void> {
     const app = express();
     app.use(logRequest);
 
-    app.get('/:sourceA/:sourceB/:sw/:zoom/:x/:y', async (req, res) => {
+    app.get('/merge/:sourceA/:sourceB/:sw/:zoom/:x/:y', async (req, res) => {
         try {
             const {sw, x, y, zoom, sourceA, sourceB} = req.params;
             const [A, B] = await Promise.all([
