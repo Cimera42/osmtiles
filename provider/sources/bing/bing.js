@@ -42,7 +42,7 @@ function getBingUrl(req) {
   }
 }
 
-function setBingLocationHeader() {
+function setBingLocationHeader(req) {
   req.headersOut["Location"] = getBingUrl(req);
 }
 
