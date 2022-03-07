@@ -6,10 +6,10 @@ function xyzToQuadkey(x, y, z) {
     const mask = 1 << (i - 1);
 
     if ((x & mask) != 0) {
-      digit = digit + 1;
+      digit += 1;
     }
     if ((y & mask) != 0) {
-      digit = digit + 2;
+      digit += 2;
     }
 
     quadkey += digit.toString();
