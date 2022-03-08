@@ -11,7 +11,11 @@ const logRequest = (req: Request, res: Response, next: NextFunction) => {
     next();
 };
 
-type SourceName = 'dcsnsw' | 'strava' | 'bom';
+interface ParentPart {
+    partialX: number;
+    partialY: number;
+    size: number;
+}
 
 class NotFoundError extends BaseError {}
 
@@ -47,6 +51,22 @@ function createBlank() {
         .toBuffer();
 }
 
+const extractParentPart = (
+    desiredWidth: number,
+    desiredHeight: number,
+    image: sharp.Sharp,
+    part: ParentPart
+) => {
+    const newWidth = desiredWidth / part.size;
+    const newHeight = desiredHeight / part.size;
+    return image.resize(newWidth, newHeight).extract({
+        left: part.partialX * newWidth,
+        top: part.partialY * newHeight,
+        width: desiredWidth,
+        height: desiredHeight,
+    });
+};
+
 async function getSource(
     name: string,
     sw: string,
@@ -81,7 +101,12 @@ async function getSource(
     }
 }
 
-function getPartOfParent(desiredZoom: string, actualZoom: string, x: string, y: string) {
+function getPartOfParent(
+    desiredZoom: string,
+    actualZoom: string,
+    x: string,
+    y: string
+): ParentPart {
     const diff = parseInt(desiredZoom) - parseInt(actualZoom);
     logger.info(`d: ${diff}`);
     let z = desiredZoom;
@@ -127,33 +152,14 @@ export async function runServer(): Promise<void> {
             const bImage = sharp(B[0]);
             const bPos = getPartOfParent(zoom, B[1], x, y);
             logger.info(`${bPos.partialX} ${bPos.partialY} ${bPos.size}`);
-            const aImageMeta = await aImage.metadata();
-            const bImageMeta = await bImage.metadata();
 
-            // const width = Math.max(aImageMeta.width ?? 0, bImageMeta.width ?? 0, 256);
-            // const height = Math.max(aImageMeta.height ?? 0, bImageMeta.height ?? 0, 256);
             const width = 256;
             const height = 256;
 
-            const combined = await aImage
-                .extract({
-                    left: aPos.partialX * aImageMeta.width,
-                    top: aPos.partialY * aImageMeta.height,
-                    width: aPos.size * aImageMeta.width,
-                    height: aPos.size * aImageMeta.height,
-                })
-                .resize(width, height)
+            const combined = await extractParentPart(width, height, aImage, aPos)
                 .composite([
                     {
-                        input: await bImage
-                            .extract({
-                                left: bPos.partialX * bImageMeta.width,
-                                top: bPos.partialY * bImageMeta.height,
-                                width: bPos.size * bImageMeta.width,
-                                height: bPos.size * bImageMeta.height,
-                            })
-                            .resize(width, height)
-                            .toBuffer(),
+                        input: await extractParentPart(width, height, bImage, bPos).toBuffer(),
                     },
                 ])
                 .png()
