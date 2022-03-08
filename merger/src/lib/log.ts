@@ -5,7 +5,7 @@ function nowString(): string {
     return `[${getFormattedDate(new Date(), 'D/M/Y, h:m:s')}]`;
 }
 
-enum LogSeverity {
+export enum LogSeverity {
     ERROR,
     WARN,
     INFO,
@@ -13,9 +13,13 @@ enum LogSeverity {
 }
 
 class Logger {
-    constructor(private readonly loggerName: string) {}
+    constructor(
+        private readonly loggerName: string,
+        private readonly severity: LogSeverity = LogSeverity.DEBUG
+    ) {}
 
     public log(message: string, severity: LogSeverity): void {
+        if (severity > this.severity) return;
         const levelName = LogSeverity[severity];
 
         const logInfoStr = `${nowString()} [${levelName}] ${this.loggerName}: `;
