@@ -150,7 +150,7 @@ async function getZoomOrParentTileImage(name: string, params: TileParams): Promi
     } catch (e) {
         if (zoom != '0') {
             const parentTileParams = getParentTileParams(params);
-            logger.info(
+            logger.debug(
                 `${name} - Parent tile is (${parentTileParams.zoom}, ${parentTileParams.x}, ${parentTileParams.y})`
             );
             return await getZoomOrParentTileImage(name, parentTileParams);
