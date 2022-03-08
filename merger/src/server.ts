@@ -1,10 +1,12 @@
-import Logger from './lib/log';
+import Logger, {LogSeverity} from './lib/log';
 import express, {NextFunction, Request, Response} from 'express';
 import axios from 'axios';
 import sharp from 'sharp';
 import {BaseError} from './lib/error';
 
-const logger = new Logger('Server');
+const logger = new Logger('Server', LogSeverity.INFO);
+const TILE_WIDTH = 256;
+const TILE_HEIGHT = 256;
 
 const logRequest = (req: Request, res: Response, next: NextFunction) => {
     logger.info(req.originalUrl);
@@ -16,28 +18,21 @@ interface ParentPart {
     partialY: number;
     size: number;
 }
+type TileImage = [data: Buffer, zoom: string];
+interface TileParams {
+    sw: string;
+    x: string;
+    y: string;
+    zoom: string;
+}
 
 class NotFoundError extends BaseError {}
 
-function getParent(x: string, y: string, zoom: string) {
-    const halfX = parseInt(x, 10) / 2;
-    const halfY = parseInt(y, 10) / 2;
-    return {
-        z: (parseInt(zoom, 10) - 1).toString(),
-        x: Math.floor(halfX).toString(),
-        y: Math.floor(halfY).toString(),
-        xOffset: halfX % 1,
-        yOffset: halfY % 1,
-        xSize: 1 - (halfX % 1),
-        ySize: 1 - (halfY % 1),
-    };
-}
-
-function createBlank() {
+function createBlank(width: number, height: number) {
     return sharp({
         create: {
-            width: 256,
-            height: 256,
+            width,
+            height,
             channels: 4,
             background: {
                 r: 0,
@@ -46,12 +41,17 @@ function createBlank() {
                 alpha: 0,
             },
         },
-    })
-        .png()
-        .toBuffer();
+    });
 }
-
-const extractParentPart = (
+/**
+ * Extract sub-tile from parent image
+ * @param desiredWidth Final width of extracted image
+ * @param desiredHeight Final height of extracted image
+ * @param image Image to extract from
+ * @param part Coordinates to extract
+ * @returns Image
+ */
+const extractPartFromParentTile = (
     desiredWidth: number,
     desiredHeight: number,
     image: sharp.Sharp,
@@ -67,70 +67,126 @@ const extractParentPart = (
     });
 };
 
-async function getSource(
-    name: string,
-    sw: string,
-    x: string,
-    y: string,
-    zoom: string
-): Promise<[Buffer, string]> {
+/**
+ * Get x, y, and zoom of parent tile
+ * @param params Tile params of sub-tile
+ * @returns Parent tile params
+ */
+function getParentTileParams(params: TileParams): TileParams {
+    const {x, y, zoom, ...otherParams} = params;
+    return {
+        ...otherParams,
+        x: (parseInt(x, 10) >> 1).toString(),
+        y: (parseInt(y, 10) >> 1).toString(),
+        zoom: (parseInt(zoom, 10) - 1).toString(),
+    };
+}
+
+/**
+ * Get coordinates of sub-tile in parent with specific zoom
+ * @param parentZoom Zoom of parent tile
+ * @param params Sub-tile params
+ * @returns Sub-tile coordinates from 0 -> 1
+ */
+function getCoordinatesInParentTile(
+    parentZoom: string,
+    params: Omit<TileParams, 'sw'>
+): ParentPart {
+    const {x, y, zoom} = params;
+    const diff = parseInt(zoom) - parseInt(parentZoom);
+
+    const partialX = (parseInt(x, 10) / Math.pow(2, diff)) % 1;
+    const partialY = (parseInt(y, 10) / Math.pow(2, diff)) % 1;
+    const size = 1 / Math.pow(2, diff);
+
+    return {partialX, partialY, size};
+}
+
+/**
+ * Load a tile image
+ * - Throws NotFoundError if unable to load a valid tile
+ * @param name Tile source
+ * @param params Tile params
+ * @returns Fetched tile
+ * @throws NotFoundError
+ */
+async function getTileImage(name: string, params: TileParams): Promise<Buffer> {
+    const {sw, x, y, zoom} = params;
     try {
-        logger.info(zoom);
-        const request = await axios({
+        const request = await axios.request<Buffer>({
             method: 'get',
-            url: `https://osm.timporritt.com/source/${name}/${sw}/${zoom}/${x}/${y}`,
+            url: `http://localhost/source/${name}/${sw}/${zoom}/${x}/${y}`,
             responseType: 'arraybuffer',
             headers: {
                 'User-Agent': 'NodeJS',
             },
         });
-        return [request.data, zoom];
-    } catch (e) {
-        if (zoom != '0') {
-            const parentTile = getParent(x, y, zoom);
-            logger.info(`Parent tile is ${parentTile.z},${parentTile.x},${parentTile.y}`);
-            const p = await getSource(name, sw, parentTile.x, parentTile.y, parentTile.z);
-            logger.warn(`Missing ${zoom},${x},${y} - got ${p[1]}`);
-            return p;
+        if (request.data.length === 0) {
+            throw new NotFoundError('Empty response');
         }
-        logger.error(
-            `${name}: (${sw}, ${zoom}, ${x}, ${y}) - ${e?.response?.status}: ${e?.response?.statusText}`
+        return request.data;
+    } catch (e) {
+        logger.debug(
+            `Failed to get ${name} tile: (${sw}, ${zoom}, ${x}, ${y}) - ${
+                e?.response ? `${e.response?.status}: ${e.response?.statusText}` : e
+            }`
         );
         throw new NotFoundError(e);
-        // return createBlank();
     }
 }
 
-function getPartOfParent(
-    desiredZoom: string,
-    actualZoom: string,
-    x: string,
-    y: string
-): ParentPart {
-    const diff = parseInt(desiredZoom) - parseInt(actualZoom);
-    logger.info(`d: ${diff}`);
-    let z = desiredZoom;
-    let n = 0;
-    let partialX = 0;
-    let partialY = 0;
-    let size = 1;
-    let newX = x;
-    let newY = y;
-    while (z != actualZoom) {
-        const parent = getParent(newX, newY, z);
-        logger.info(
-            `n: ${n}, ${newX}, ${newY}, ${z}, ${parent.xOffset}, ${parent.xOffset}, ${parent.xSize}`
-        );
-        partialX += parent.xOffset * Math.pow(0.5, diff - (n + 1));
-        partialY += parent.yOffset * Math.pow(0.5, diff - (n + 1));
-        logger.info(`${partialX}, ${partialY}, ${size}`);
-        size *= 0.5;
-        z = parent.z;
-        newX = parent.x;
-        newY = parent.y;
-        n++;
+/**
+ * Try to fetch specific zoom level, and recursively fall back to parent tile until one a valid tile is found
+ * - Throws NotFoundError if unable to load a valid tile
+ * @param name Tile source
+ * @param params Tile params
+ * @returns Fetched tile and zoom level
+ * @throws NotFoundError
+ */
+async function getZoomOrParentTileImage(name: string, params: TileParams): Promise<TileImage> {
+    const {zoom} = params;
+    try {
+        return [await getTileImage(name, params), params.zoom];
+    } catch (e) {
+        if (zoom != '0') {
+            const parentTileParams = getParentTileParams(params);
+            logger.info(
+                `${name} - Parent tile is (${parentTileParams.zoom}, ${parentTileParams.x}, ${parentTileParams.y})`
+            );
+            return await getZoomOrParentTileImage(name, parentTileParams);
+        }
+        throw e;
     }
-    return {partialX, partialY, size};
+}
+
+/**
+ * Load list of tile sources with the same params, falling back to parent tiles if available
+ * - Throws NotFoundError if no base zoom level tiles found
+ * @param sources List of tile sources
+ * @param params Tile params
+ * @returns Array of tile images and their zoom levels
+ */
+async function getTileImages(sources: string[], params: TileParams): Promise<TileImage[]> {
+    const baseZoomLevelResults = await Promise.allSettled(
+        sources.map((name) => getTileImage(name, params))
+    );
+    logger.debug(baseZoomLevelResults.map((r, i) => `${sources[i]}: ${r.status}`).join('; '));
+
+    // Throw 404 if neither tile found, to make viewer handle it
+    if (baseZoomLevelResults.every((r) => r.status === 'rejected')) {
+        throw new NotFoundError('Not found');
+    }
+
+    // Use found tile, or get parent
+    const parentTileParams = getParentTileParams(params);
+    return await Promise.all(
+        baseZoomLevelResults.map(
+            (r, i): Promise<TileImage> =>
+                r.status === 'rejected'
+                    ? getZoomOrParentTileImage(sources[i], parentTileParams)
+                    : Promise.resolve([r.value, params.zoom])
+        )
+    );
 }
 
 export async function runServer(): Promise<void> {
@@ -142,26 +198,31 @@ export async function runServer(): Promise<void> {
     app.get('/:sourceA/:sourceB/:sw/:zoom/:x/:y', async (req, res) => {
         try {
             const {sw, x, y, zoom, sourceA, sourceB} = req.params;
-            const [A, B] = await Promise.all([
-                getSource(sourceA, sw, x, y, zoom),
-                getSource(sourceB, sw, x, y, zoom),
-            ]);
+            const sources = [sourceA, sourceB];
 
-            const aImage = sharp(A[0]);
-            const aPos = getPartOfParent(zoom, A[1], x, y);
-            const bImage = sharp(B[0]);
-            const bPos = getPartOfParent(zoom, B[1], x, y);
-            logger.info(`${bPos.partialX} ${bPos.partialY} ${bPos.size}`);
+            const params: TileParams = {sw, x, y, zoom};
+            const tileImagesData = await getTileImages(sources, params);
 
-            const width = 256;
-            const height = 256;
+            const tileImageAndCoordinates = tileImagesData.map(
+                ([imgData, tileZoom]): [sharp.Sharp, ParentPart] => [
+                    sharp(imgData),
+                    getCoordinatesInParentTile(tileZoom, params),
+                ]
+            );
 
-            const combined = await extractParentPart(width, height, aImage, aPos)
-                .composite([
-                    {
-                        input: await extractParentPart(width, height, bImage, bPos).toBuffer(),
-                    },
-                ])
+            const combined = await createBlank(TILE_WIDTH, TILE_HEIGHT)
+                .composite(
+                    await Promise.all(
+                        tileImageAndCoordinates.map(async ([img, coords]) => ({
+                            input: await extractPartFromParentTile(
+                                TILE_WIDTH,
+                                TILE_HEIGHT,
+                                img,
+                                coords
+                            ).toBuffer(),
+                        }))
+                    )
+                )
                 .png()
                 .toBuffer();
 
@@ -170,6 +231,7 @@ export async function runServer(): Promise<void> {
         } catch (e) {
             if (e instanceof NotFoundError) {
                 res.status(404).send('Imagery not found');
+                return;
             } else {
                 res.status(500).send('Something went wrong');
             }
