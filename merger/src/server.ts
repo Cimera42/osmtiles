@@ -7,6 +7,7 @@ import {BaseError} from './lib/error';
 const logger = new Logger('Server', LogSeverity.INFO);
 const TILE_WIDTH = 256;
 const TILE_HEIGHT = 256;
+const TILE_HOST = 'https://osm.timporritt.com';
 
 const logRequest = (req: Request, res: Response, next: NextFunction) => {
     logger.info(req.originalUrl);
@@ -115,7 +116,7 @@ async function getTileImage(name: string, params: TileParams): Promise<Buffer> {
     try {
         const request = await axios.request<Buffer>({
             method: 'get',
-            url: `http://localhost/source/${name}/${sw}/${zoom}/${x}/${y}`,
+            url: `${TILE_HOST}/source/${name}/${sw}/${zoom}/${x}/${y}`,
             responseType: 'arraybuffer',
             headers: {
                 'User-Agent': 'NodeJS',
